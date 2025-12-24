@@ -3,8 +3,6 @@ package main
 import (
 	"os"
 
-	// "fmt"
-
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -14,9 +12,7 @@ import (
 	"go-jwt-api/config"
 	"go-jwt-api/models"
 	"go-jwt-api/routes"
-
 	"go-jwt-api/seed"
-
 )
 
 // @title Go JWT API
@@ -27,27 +23,41 @@ import (
 func main() {
 	r := gin.Default()
 
+	// Load env & connect DB
 	config.LoadEnv()
 	config.ConnectDB()
 
-	config.DB.AutoMigrate(&models.User{}, &models.Item{})
+	// Auto migrate
+	config.DB.AutoMigrate(
+		&models.User{},
+		&models.Item{},
+	)
 
+	// Seed data (dev only)
 	if os.Getenv("APP_ENV") == "dev" {
 		seed.SeedItems()
 	}
 
+	// Routes
 	routes.Setup(r)
 
+	// Swagger
+	// r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Swagger (เปิดเฉพาะ dev)
+	if os.Getenv("APP_ENV") != "prod" {
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
+
+	// Static files (uploads)
+	r.Static("/uploads", "./uploads")
+
+	// Port
 	port := os.Getenv("APP_PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Run server (ต้องท้ายสุด)
 	r.Run(":" + port)
-	r.Static("/uploads", "./uploads")
-
-
-	// fmt.Println("Server running on port " + port)
-	// fmt.Println("Swagger UI: http://localhost:" + port + "/swagger/index.html")
 }

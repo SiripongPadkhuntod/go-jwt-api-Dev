@@ -1,24 +1,9 @@
 package routes
 
-import (
-	"github.com/gin-gonic/gin"
-	"go-jwt-api/handlers"
-	"go-jwt-api/middleware"
-)
+import "github.com/gin-gonic/gin"
 
+// Setup registers all routes
 func Setup(r *gin.Engine) {
-	auth := r.Group("/auth")
-	{
-		auth.POST("/register", handlers.Register)
-		auth.POST("/login", handlers.Login)
-	}
-
-	item := r.Group("/items")
-	item.Use(middleware.AuthMiddleware())
-	{
-		item.GET("", handlers.GetItems)
-		item.POST("", handlers.CreateItem)
-		item.PUT("/:id", handlers.UpdateItem)
-		item.POST("/:id/upload", handlers.UploadItemImage)
-	}
+	SetupAuthRoutes(r)
+	SetupItemRoutes(r)
 }
