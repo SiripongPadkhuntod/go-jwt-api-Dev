@@ -19,5 +19,6 @@ func Setup(r *gin.Engine) {
 		item.GET("", handlers.GetItems)
 		item.POST("", handlers.CreateItem)
 		item.PUT("/:id", handlers.UpdateItem)
+		item.POST("/:id/upload", handlers.UploadItemImage)
 	}
 }

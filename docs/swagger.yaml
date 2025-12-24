@@ -7,6 +7,16 @@ definitions:
         type: string
     type: object
   models.Item:
+    properties:
+      id:
+        type: integer
+      image:
+        description: path หรือ url
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
     type: object
   models.ItemDTO:
     properties:
@@ -152,6 +162,31 @@ paths:
       summary: Update item
       tags:
       - Item
+  /items/{id}/upload:
+    post:
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Item image
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload item image
+      tags:
+      - items
 securityDefinitions:
   BearerAuth:
     in: header

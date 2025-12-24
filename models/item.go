@@ -1,9 +1,11 @@
 package models
 
-import "gorm.io/gorm"
+// import "gorm.io/gorm"
 
 type Item struct {
-	gorm.Model
-	Name  string `gorm:"index" json:"name"`
-	Price int    `gorm:"index" json:"price"`
+	ID    uint   `json:"id" gorm:"primaryKey"`
+	Name  string `json:"name"`
+	Price int    `json:"price"`
+	Image string `json:"image"` // path หรือ url
 }
+

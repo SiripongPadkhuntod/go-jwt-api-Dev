@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"fmt"
+	// "fmt"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -45,7 +45,9 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Run(":" + port)
+	r.Static("/uploads", "./uploads")
 
-	fmt.Println("Server running on port " + port)
-	fmt.Println("Swagger UI: http://localhost:" + port + "/swagger/index.html")
+
+	// fmt.Println("Server running on port " + port)
+	// fmt.Println("Swagger UI: http://localhost:" + port + "/swagger/index.html")
 }

@@ -4,6 +4,9 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	
+	"os"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"go-jwt-api/config"
@@ -123,4 +126,43 @@ func UpdateItem(c *gin.Context) {
 	c.BindJSON(&item)
 	config.DB.Save(&item)
 	c.JSON(http.StatusOK, item)
+}
+
+
+// UploadItemImage godoc
+// @Summary Upload item image
+// @Tags items
+// @Security BearerAuth
+// @Param id path int true "Item ID"
+// @Param file formData file true "Item image"
+// @Success 200 {object} map[string]string
+// @Router /items/{id}/upload [post]
+func UploadItemImage(c *gin.Context) {
+	id := c.Param("id")
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(400, gin.H{"error": "file is required"})
+		return
+	}
+
+	// สร้างโฟลเดอร์ uploads ถ้ายังไม่มี
+	os.MkdirAll("uploads", os.ModePerm)
+
+	filename := fmt.Sprintf("uploads/item_%s_%s", id, file.Filename)
+
+	if err := c.SaveUploadedFile(file, filename); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	// update item
+	config.DB.Model(&models.Item{}).
+		Where("id = ?", id).
+		Update("image", filename)
+
+	c.JSON(200, gin.H{
+		"message": "upload success",
+		"image":   filename,
+	})
 }
