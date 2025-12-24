@@ -66,18 +66,38 @@ paths:
       - Auth
   /items:
     get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: price_asc | price_desc | name_asc | name_desc
+        in: query
+        name: sort
+        type: string
+      - description: Search keyword
+        in: query
+        name: q
+        type: string
+      - description: Cursor ID
+        in: query
+        name: cursor
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.ItemDTO'
-            type: array
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
-      summary: Get items
+      summary: Get items (pagination, search, sort, cursor)
       tags:
       - Item
     post:

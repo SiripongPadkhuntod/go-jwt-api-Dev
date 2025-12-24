@@ -15,6 +15,8 @@ import (
 	"go-jwt-api/models"
 	"go-jwt-api/routes"
 
+	"go-jwt-api/seed"
+
 )
 
 // @title Go JWT API
@@ -31,7 +33,7 @@ func main() {
 	config.DB.AutoMigrate(&models.User{}, &models.Item{})
 
 	if os.Getenv("APP_ENV") == "dev" {
-		// seed.SeedItems()
+		seed.SeedItems()
 	}
 
 	routes.Setup(r)
