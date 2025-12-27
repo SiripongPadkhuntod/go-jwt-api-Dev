@@ -12,9 +12,9 @@ func SetupItemRoutes(r *gin.Engine) {
 	items := r.Group("/items")
 	items.Use(middleware.AuthMiddleware())
 	{
-		items.GET("", handlers.GetItems)
-		items.POST("", handlers.CreateItem)
-		items.PUT("/:id", handlers.UpdateItem)
+		items.GET("/", handlers.GetItems)
+		items.POST("/create", handlers.CreateItem)
+		items.PUT("/update/:id", handlers.UpdateItem)
 
 		// upload image
 		items.POST("/:id/upload", handlers.UploadItemImage)

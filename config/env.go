@@ -4,11 +4,14 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
+
+	"os"
 )
 
 func LoadEnv() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("⚠️ No .env file found")
+	if err := godotenv.Load(); err != nil {
+		if os.Getenv("APP_ENV") == "dev" {
+			log.Println("⚠️ No .env file found")
+		}
 	}
 }

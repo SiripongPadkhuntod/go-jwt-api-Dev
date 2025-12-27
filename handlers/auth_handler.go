@@ -26,9 +26,21 @@ type AuthRequest struct {
 // @Router /auth/register [post]
 func Register(c *gin.Context) {
 	var req AuthRequest
-	c.BindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
 
-	hash, _ := utils.HashPassword(req.Password)
+	if req.Username == "" || req.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "username and password required"})
+		return
+	}
+
+	hash, err := utils.HashPassword(req.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "hash failed"})
+		return
+	}
 
 	user := models.User{
 		Username: req.Username,
@@ -43,6 +55,7 @@ func Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "registered"})
 }
 
+
 // @Summary Login
 // @Tags Auth
 // @Accept json
@@ -52,26 +65,41 @@ func Register(c *gin.Context) {
 // @Router /auth/login [post]
 func Login(c *gin.Context) {
 	var req AuthRequest
-	c.BindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
 
 	var user models.User
 	if err := config.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
 
 	if !utils.CheckPassword(user.Password, req.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	now := time.Now()
+
+	claims := jwt.MapClaims{
 		"user_id": user.ID,
-		"exp":     time.Now().Add(24 * time.Hour).Unix(),
-	})
+		"username": user.Username,
+		"role": "user",
+		"iat": now.Unix(),
+		"nbf": now.Unix(),
+		"exp": now.Add(24 * time.Hour).Unix(),
+	}
 
-	tokenString, _ := token.SignedString(config.GetJwtSecret())
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
+	tokenString, err := token.SignedString(config.GetJwtSecret())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "token generation failed"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
+

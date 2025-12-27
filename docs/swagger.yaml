@@ -110,6 +110,32 @@ paths:
       summary: Get items (pagination, search, sort, cursor)
       tags:
       - Item
+  /items/{id}/upload:
+    post:
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Item image
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload item image
+      tags:
+      - items
+  /items/create:
     post:
       consumes:
       - application/json
@@ -132,7 +158,7 @@ paths:
       summary: Create item
       tags:
       - Item
-  /items/{id}:
+  /items/update/{id}:
     put:
       consumes:
       - application/json
@@ -162,31 +188,6 @@ paths:
       summary: Update item
       tags:
       - Item
-  /items/{id}/upload:
-    post:
-      parameters:
-      - description: Item ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Item image
-        in: formData
-        name: file
-        required: true
-        type: file
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Upload item image
-      tags:
-      - items
 securityDefinitions:
   BearerAuth:
     in: header

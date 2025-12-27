@@ -136,7 +136,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/items/create": {
             "post": {
                 "security": [
                     {
@@ -174,7 +176,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/items/{id}": {
+        "/items/update/{id}": {
             "put": {
                 "security": [
                     {

@@ -100,13 +100,27 @@ func GetItems(c *gin.Context) {
 // @Produce json
 // @Param body body models.Item true "Item"
 // @Success 200 {object} models.Item
-// @Router /items [post]
+// @Router /items/create [post]
 func CreateItem(c *gin.Context) {
 	var item models.Item
-	c.BindJSON(&item)
-	config.DB.Create(&item)
-	c.JSON(http.StatusOK, item)
+	if err := c.ShouldBindJSON(&item); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request"})
+		return
+	}
+
+	if item.Name == "" || item.Price <= 0 {
+		c.JSON(400, gin.H{"error": "invalid item data"})
+		return
+	}
+
+	if err := config.DB.Create(&item).Error; err != nil {
+		c.JSON(500, gin.H{"error": "db error"})
+		return
+	}
+
+	c.JSON(201, item)
 }
+
 
 // @Security BearerAuth
 // @Summary Update item
@@ -116,17 +130,27 @@ func CreateItem(c *gin.Context) {
 // @Param id path int true "Item ID"
 // @Param body body models.Item true "Item"
 // @Success 200 {array} models.ItemDTO
-// @Router /items/{id} [put]
+// @Router /items/update/{id} [put]
 func UpdateItem(c *gin.Context) {
 	var item models.Item
 	if err := config.DB.First(&item, c.Param("id")).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		c.JSON(404, gin.H{"error": "not found"})
 		return
 	}
-	c.BindJSON(&item)
+
+	var input models.Item
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request"})
+		return
+	}
+
+	item.Name = input.Name
+	item.Price = input.Price
+
 	config.DB.Save(&item)
-	c.JSON(http.StatusOK, item)
+	c.JSON(200, item)
 }
+
 
 
 // UploadItemImage godoc

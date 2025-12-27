@@ -1,7 +1,14 @@
 package config
 
-import "os"
+import (
+	"log"
+	"os"
+)
 
 func GetJwtSecret() []byte {
-	return []byte(os.Getenv("JWT_SECRET"))
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		log.Fatal("JWT_SECRET is not set")
+	}
+	return []byte(secret)
 }

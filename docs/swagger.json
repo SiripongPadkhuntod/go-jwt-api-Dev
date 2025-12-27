@@ -127,7 +127,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/items/create": {
             "post": {
                 "security": [
                     {
@@ -165,7 +167,7 @@
                 }
             }
         },
-        "/items/{id}": {
+        "/items/update/{id}": {
             "put": {
                 "security": [
                     {
