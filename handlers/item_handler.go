@@ -27,7 +27,7 @@ import (
 // @Router /items [get]
 func GetItems(c *gin.Context) {
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1")) //strconv.Atoi แปลงสตริงเป็นจำนวนเต็ม
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	sort := c.DefaultQuery("sort", "id_asc")
 	q := c.Query("q")
@@ -40,19 +40,19 @@ func GetItems(c *gin.Context) {
 		limit = 10
 	}
 
-	db := config.DB.Model(&models.Item{})
+	db := config.DB.Model(&models.Item{}) // เริ่มต้นการสร้างคำสั่ง SQL โดยใช้ GORM โดยระบุโมเดลที่ต้องการคือ models.Item
 
-	// 🔍 Search
+	// Search
 	if q != "" {
 		db = db.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(q)+"%")
 	}
 
-	// 🔄 Cursor-based pagination
+	// Cursor-based pagination
 	if cursor > 0 {
 		db = db.Where("id > ?", cursor)
 	}
 
-	// 🔃 Sort
+	// Sort
 	switch sort {
 	case "price_asc":
 		db = db.Order("price asc")
@@ -84,7 +84,9 @@ func GetItems(c *gin.Context) {
 		})
 	}
 
-	meta := utils.BuildMeta(page, limit, total)
+	meta := utils.BuildMeta(page, limit, total) // เรียกใช้ฟังก์ชัน BuildMeta จากแพ็กเกจ utils เพื่อสร้างข้อมูลเมตาเกี่ยวกับการแบ่งหน้า (pagination) โดยใช้ค่าของตัวแปร page, limit, total
+
+	// Response
 
 	c.JSON(http.StatusOK, gin.H{
 		"data": data,
@@ -103,22 +105,22 @@ func GetItems(c *gin.Context) {
 // @Router /items/create [post]
 func CreateItem(c *gin.Context) {
 	var item models.Item
-	if err := c.ShouldBindJSON(&item); err != nil {
+	if err := c.ShouldBindJSON(&item); err != nil { // ShouldBindJSON แปลงข้อมูล JSON ที่ส่งมาจากคำขอ HTTP เป็นโครงสร้างข้อมูล Go
 		c.JSON(400, gin.H{"error": "invalid request"})
 		return
 	}
 
-	if item.Name == "" || item.Price <= 0 {
+	if item.Name == "" || item.Price <= 0 { // ตรวจสอบความถูกต้องของข้อมูลที่ได้รับมา
 		c.JSON(400, gin.H{"error": "invalid item data"})
 		return
 	}
 
-	if err := config.DB.Create(&item).Error; err != nil {
+	if err := config.DB.Create(&item).Error; err != nil { 
 		c.JSON(500, gin.H{"error": "db error"})
 		return
 	}
 
-	c.JSON(201, item)
+	c.JSON(201, item) // ส่งกลับข้อมูลของไอเท็มที่สร้างใหม่พร้อมกับสถานะ HTTP 201 (Created)
 }
 
 
@@ -173,7 +175,8 @@ func UploadItemImage(c *gin.Context) {
 	// สร้างโฟลเดอร์ uploads ถ้ายังไม่มี
 	os.MkdirAll("uploads", os.ModePerm)
 
-	filename := fmt.Sprintf("uploads/item_%s_%s", id, file.Filename)
+	filename := fmt.Sprintf("uploads/item_%s_%s", id, file.Filename) 
+	//sprintf คือ การจัดรูปแบบสตริงในภาษา Go โดยใช้ฟังก์ชัน fmt.Sprintf ซึ่งจะสร้างสตริงใหม่ตามรูปแบบที่กำหนด โดยในที่นี้จะสร้างชื่อไฟล์ใหม่สำหรับการอัปโหลดภาพของไอเท็ม โดยใช้ ID ของไอเท็มและชื่อไฟล์ต้นฉบับของภาพมาเป็นส่วนประกอบในการตั้งชื่อไฟล์ใหม่
 
 	if err := c.SaveUploadedFile(file, filename); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
