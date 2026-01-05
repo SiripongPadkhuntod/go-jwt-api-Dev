@@ -74,10 +74,10 @@ func GetItems(c *gin.Context) {
 	var items []models.Item
 	db.Limit(limit).Offset(offset).Find(&items)
 
-	// map → DTO
+	// map → DTO 
 	data := make([]models.ItemDTO, 0)
 	for _, item := range items {
-		data = append(data, models.ItemDTO{
+		data = append(data, models.ItemDTO{ //addend คือ การเพิ่มองค์ประกอบใหม่ลงในสไลซ์ (slice) ในภาษา Go โดยใช้ฟังก์ชัน built-in append ซึ่งจะสร้างสไลซ์ใหม่ที่มีองค์ประกอบเดิมพร้อมกับองค์ประกอบที่เพิ่มเข้ามา
 			ID:    item.ID,
 			Name:  item.Name,
 			Price: item.Price,
